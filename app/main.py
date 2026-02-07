@@ -1,7 +1,4 @@
 from fastapi import FastAPI
-
-# from .database import engine, Base
-# from .routers import user
 from core.database import engine, Base
 from api.users import router
 
