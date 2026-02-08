@@ -1,35 +1,26 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from collections.abc import AsyncGenerator
+
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
-from settings import settings
 
-# 从 settings 获取计算好的配置
-db_setup = settings.db_config
+from app.core.config import settings
 
-# 创建异步引擎
-engine = create_async_engine(
-    db_setup["url"], echo=settings.DEBUG, **db_setup["engine_kwargs"]
-)
-
-# 创建异步 Session 工厂
-AsyncSessionLocal = async_sessionmaker(
-    bind=engine,
-    class_=AsyncSession,
-    autoflush=False,
-    autocommit=False,
-    expire_on_commit=False,
-)
+engine = create_async_engine(settings.DATABASE_URL, echo=settings.DEBUG)
+AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 
-# 声明式基类：所有 models/*.py 里的类都要继承它
 class Base(DeclarativeBase):
-    pass
+	pass
 
 
-# FastAPI 依赖注入项
-async def get_db():
-    """获取数据库异步连接会话"""
-    async with AsyncSessionLocal() as session:
-        try:
-            yield session
-        finally:
-            await session.close()
+async def get_db() -> AsyncGenerator[AsyncSession]:
+	async with AsyncSessionLocal() as session:
+		try:
+			yield session
+		finally:
+			await session.close()
+
+
+async def init_db() -> None:
+	async with engine.begin() as conn:
+		await conn.run_sync(Base.metadata.create_all)

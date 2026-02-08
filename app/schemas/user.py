@@ -1,16 +1,21 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
 class UserBase(BaseModel):
-    username: str
+	username: str
+	email: str
 
 
 class UserCreate(UserBase):
-    pass
+	pass
+
+
+class UserUpdate(BaseModel):
+	username: str | None = None
+	email: str | None = None
 
 
 class UserOut(UserBase):
-    id: int
+	id: int
 
-    class Config:
-        from_attributes = True  # 允许将 SQLAlchemy 对象转为 Pydantic
+	model_config = {"from_attributes": True}
