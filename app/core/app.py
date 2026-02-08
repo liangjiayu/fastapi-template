@@ -11,7 +11,8 @@ from app.core.database import engine, init_db
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 	logger.info("Starting up...")
-	await init_db()
+	if settings.APP_ENV == "development":
+		await init_db()
 	yield
 	logger.info("Shutting down...")
 	await engine.dispose()
