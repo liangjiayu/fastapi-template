@@ -17,9 +17,10 @@ FastAPI project template with async SQLAlchemy, supporting PostgreSQL and SQLite
 
 ```
 app/
-├── main.py              # FastAPI app factory (init_app) + lifespan
+├── main.py              # App entry point (creates app instance)
 ├── api/                 # Route handlers (thin layer, delegates to services)
 ├── core/
+│   ├── app.py           # App factory (init_app) + lifespan
 │   ├── config.py        # Settings via pydantic-settings (single source of truth)
 │   └── database.py      # Async engine, session factory, Base, get_db()
 ├── models/              # SQLAlchemy ORM models
@@ -37,7 +38,7 @@ app/
 
 ## Commands
 
-- **Run dev server:** `python main.py` or `uvicorn main:app --reload`
+- **Run dev server:** `fastapi dev app/main.py`
 - **Install deps:** `uv sync`
 
 ## Configuration
