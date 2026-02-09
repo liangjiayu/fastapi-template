@@ -24,16 +24,26 @@ app/
 │   ├── database.py          # 异步引擎、会话工厂、Base、get_db()
 │   └── exceptions.py        # BizException + 全局异常处理器
 ├── api/                     # 路由层 (薄层，只做请求/响应)
-│   └── users.py
+│   ├── users.py             # 用户接口
+│   ├── conversations.py     # 会话接口
+│   └── messages.py          # 消息接口
 ├── services/                # 业务逻辑层 (校验、编排)
-│   └── user_service.py
+│   ├── user_service.py
+│   ├── conversation_service.py
+│   └── message_service.py
 ├── repositories/            # 数据访问层 (静态方法，接收 db session)
-│   └── user_repository.py
+│   ├── user_repository.py
+│   ├── conversation_repository.py
+│   └── message_repository.py
 ├── models/                  # SQLAlchemy ORM 模型
-│   └── user.py
+│   ├── user.py              # 用户模型
+│   ├── conversation.py      # 会话模型
+│   └── message.py           # 消息模型
 └── schemas/                 # Pydantic 请求/响应模型
+    ├── response.py          # 统一响应结构 ApiResponse[T] + PageData[T]
     ├── user.py
-    └── response.py          # 统一响应结构 ApiResponse[T]
+    ├── conversation.py
+    └── message.py
 ```
 
 ## 架构
@@ -83,31 +93,47 @@ fastapi dev app/main.py
 
 启动后访问 `http://127.0.0.1:8000/docs` 查看交互式 API 文档。
 
-> 开发模式下 (`APP_ENV=development`) 会自动同步表结构，生产环境需手动管理数据库迁移。
+> **SQLite 模式：** 开发环境下会自动创建表结构，无需额外操作。
+>
+> **PostgreSQL 模式：** 需使用 `sql/schema.sql` 手动创建表结构。
 
 ## API 接口
 
-所有接口前缀为 `/api`，返回统一的响应结构：
-
-```json
-{
-  "code": 200,
-  "msg": "success",
-  "data": {}
-}
-```
+所有接口前缀为 `/api`，返回统一的响应结构。列表接口均支持 `page` / `page_size` 分页，并返回分页元数据。
 
 ### Users
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | POST | `/api/users/` | 创建用户 |
-| GET | `/api/users/` | 获取用户列表 (支持 skip/limit 分页) |
+| GET | `/api/users/` | 获取用户列表 (分页) |
 | GET | `/api/users/{user_id}` | 获取单个用户 |
 | PUT | `/api/users/{user_id}` | 更新用户 |
 | DELETE | `/api/users/{user_id}` | 删除用户 |
 
+### Conversations
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/conversations/` | 创建会话 |
+| GET | `/api/conversations/` | 获取会话列表 (支持 user_id 筛选, 分页) |
+| GET | `/api/conversations/{conversation_id}` | 获取单个会话 |
+| PUT | `/api/conversations/{conversation_id}` | 更新会话 |
+| DELETE | `/api/conversations/{conversation_id}` | 删除会话 |
+
+### Messages
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/messages/` | 创建消息 |
+| GET | `/api/messages/conversation/{conversation_id}` | 获取会话下的消息列表 (分页) |
+| GET | `/api/messages/{message_id}` | 获取单个消息 |
+| PUT | `/api/messages/{message_id}` | 更新消息 |
+| DELETE | `/api/messages/{message_id}` | 删除消息 |
+
 ## 统一响应格式
+
+所有接口返回统一的 `ApiResponse[T]` 结构：
 
 ### 成功响应
 
@@ -116,6 +142,21 @@ fastapi dev app/main.py
   "code": 200,
   "msg": "success",
   "data": { "id": 1, "username": "alice", "email": "alice@example.com" }
+}
+```
+
+### 分页响应
+
+```json
+{
+  "code": 200,
+  "msg": "success",
+  "data": {
+    "list": [{ "id": 1, "username": "alice", "email": "alice@example.com" }],
+    "total": 50,
+    "page": 1,
+    "page_size": 20
+  }
 }
 ```
 
@@ -148,6 +189,40 @@ fastapi dev app/main.py
   "data": null
 }
 ```
+
+## 数据模型
+
+### User
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | int | 主键，自增 |
+| username | str | 用户名，唯一 |
+| email | str | 邮箱，唯一 |
+
+### Conversation
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | UUID | 主键 |
+| user_id | str | 用户标识 |
+| title | str | 会话标题 |
+| model_name | str | 模型名称 |
+| extra_data | JSON | 扩展数据 (模型配置等) |
+| created_at | datetime | 创建时间 |
+| updated_at | datetime | 更新时间 |
+
+### Message
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | UUID | 主键 |
+| conversation_id | UUID | 所属会话 (级联删除) |
+| role | str | 角色 (system / user / assistant) |
+| content | text | 消息内容 |
+| status | str | 状态 (processing / success / error) |
+| extra_data | JSON | 扩展数据 (思考过程、token 用量等) |
+| created_at | datetime | 创建时间 |
 
 ## 开发约定
 
