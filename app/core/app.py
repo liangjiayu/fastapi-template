@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.openapi.utils import get_openapi
 from fastapi.routing import APIRoute
 from loguru import logger
 
@@ -33,4 +34,24 @@ def init_app() -> FastAPI:
 	)
 	register_exception_handlers(app)
 	app.include_router(router)
+
+	def custom_openapi():
+		if app.openapi_schema:
+			return app.openapi_schema
+		openapi_schema = get_openapi(
+			title=app.title,
+			version=app.version,
+			description=app.description,
+			routes=app.routes,
+		)
+		for path in openapi_schema["paths"].values():
+			for method in path.values():
+				method.get("responses", {}).pop("422", None)
+		schemas = openapi_schema.get("components", {}).get("schemas", {})
+		schemas.pop("HTTPValidationError", None)
+		schemas.pop("ValidationError", None)
+		app.openapi_schema = openapi_schema
+		return openapi_schema
+
+	app.openapi = custom_openapi
 	return app
