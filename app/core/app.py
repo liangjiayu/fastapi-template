@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.routing import APIRoute
 from loguru import logger
 
 from app.api import router
@@ -19,11 +20,16 @@ async def lifespan(app: FastAPI):
 	await engine.dispose()
 
 
+def custom_generate_unique_id(route: APIRoute) -> str:
+	return route.name
+
+
 def init_app() -> FastAPI:
 	app = FastAPI(
 		title=settings.APP_TITLE,
 		description=settings.APP_DESCRIPTION,
 		lifespan=lifespan,
+		generate_unique_id_function=custom_generate_unique_id,
 	)
 	register_exception_handlers(app)
 	app.include_router(router)
