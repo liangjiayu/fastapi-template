@@ -12,7 +12,7 @@ from app.core.exceptions import register_exception_handlers
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 	logger.info("Starting up...")
-	if settings.APP_ENV == "development":
+	if settings.DB_ENGINE == "sqlite":
 		await init_db()
 	yield
 	logger.info("Shutting down...")
