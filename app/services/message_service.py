@@ -21,10 +21,13 @@ async def get_message(db: AsyncSession, message_id: uuid.UUID):
 
 
 async def get_messages(
-	db: AsyncSession, conversation_id: uuid.UUID, skip: int = 0, limit: int = 100
+	db: AsyncSession, conversation_id: uuid.UUID, page: int = 1, page_size: int = 20
 ):
 	await get_conversation(db, conversation_id)
-	return await MessageRepository.get_list_by_conversation_id(db, conversation_id, skip, limit)
+	offset = (page - 1) * page_size
+	messages = await MessageRepository.get_list_by_conversation_id(db, conversation_id, offset, page_size)
+	total = await MessageRepository.get_count_by_conversation_id(db, conversation_id)
+	return {"list": messages, "total": total, "page": page, "page_size": page_size}
 
 
 async def update_message(db: AsyncSession, message_id: uuid.UUID, message_in: MessageUpdate):

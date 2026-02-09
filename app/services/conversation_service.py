@@ -18,8 +18,11 @@ async def get_conversation(db: AsyncSession, conversation_id: uuid.UUID):
 	return conversation
 
 
-async def get_conversations(db: AsyncSession, user_id: str | None = None, skip: int = 0, limit: int = 100):
-	return await ConversationRepository.get_list(db, user_id, skip, limit)
+async def get_conversations(db: AsyncSession, user_id: str | None = None, page: int = 1, page_size: int = 20):
+	offset = (page - 1) * page_size
+	conversations = await ConversationRepository.get_list(db, user_id, offset, page_size)
+	total = await ConversationRepository.get_count(db, user_id)
+	return {"list": conversations, "total": total, "page": page, "page_size": page_size}
 
 
 async def update_conversation(

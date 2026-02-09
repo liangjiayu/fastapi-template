@@ -4,7 +4,7 @@ from fastapi import APIRouter
 
 from app.core.database import DB
 from app.schemas.message import MessageCreate, MessageOut, MessageUpdate
-from app.schemas.response import ApiResponse
+from app.schemas.response import ApiResponse, PageData
 from app.services import message_service
 
 router = APIRouter(prefix="/messages", tags=["Messages"])
@@ -16,12 +16,12 @@ async def create_message(message_in: MessageCreate, db: DB):
 	return ApiResponse.ok(data=message)
 
 
-@router.get("/conversation/{conversation_id}", response_model=ApiResponse[list[MessageOut]])
+@router.get("/conversation/{conversation_id}", response_model=ApiResponse[PageData[MessageOut]])
 async def get_messages(
-	conversation_id: uuid.UUID, skip: int = 0, limit: int = 100, db: DB = None
+	conversation_id: uuid.UUID, page: int = 1, page_size: int = 20, db: DB = None
 ):
-	messages = await message_service.get_messages(db, conversation_id, skip, limit)
-	return ApiResponse.ok(data=messages)
+	result = await message_service.get_messages(db, conversation_id, page, page_size)
+	return ApiResponse.page(**result)
 
 
 @router.get("/{message_id}", response_model=ApiResponse[MessageOut])

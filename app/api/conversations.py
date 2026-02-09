@@ -4,7 +4,7 @@ from fastapi import APIRouter
 
 from app.core.database import DB
 from app.schemas.conversation import ConversationCreate, ConversationOut, ConversationUpdate
-from app.schemas.response import ApiResponse
+from app.schemas.response import ApiResponse, PageData
 from app.services import conversation_service
 
 router = APIRouter(prefix="/conversations", tags=["Conversations"])
@@ -16,10 +16,10 @@ async def create_conversation(conversation_in: ConversationCreate, db: DB):
 	return ApiResponse.ok(data=conversation)
 
 
-@router.get("/", response_model=ApiResponse[list[ConversationOut]])
-async def get_conversations(user_id: str | None = None, skip: int = 0, limit: int = 100, db: DB = None):
-	conversations = await conversation_service.get_conversations(db, user_id, skip, limit)
-	return ApiResponse.ok(data=conversations)
+@router.get("/", response_model=ApiResponse[PageData[ConversationOut]])
+async def get_conversations(user_id: str | None = None, page: int = 1, page_size: int = 20, db: DB = None):
+	result = await conversation_service.get_conversations(db, user_id, page, page_size)
+	return ApiResponse.page(**result)
 
 
 @router.get("/{conversation_id}", response_model=ApiResponse[ConversationOut])

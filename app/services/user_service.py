@@ -19,8 +19,11 @@ async def get_user(db: AsyncSession, user_id: int):
 	return user
 
 
-async def get_users(db: AsyncSession, skip: int = 0, limit: int = 100):
-	return await UserRepository.get_list(db, skip, limit)
+async def get_users(db: AsyncSession, page: int = 1, page_size: int = 20):
+	offset = (page - 1) * page_size
+	users = await UserRepository.get_list(db, offset, page_size)
+	total = await UserRepository.get_count(db)
+	return {"list": users, "total": total, "page": page, "page_size": page_size}
 
 
 async def update_user(db: AsyncSession, user_id: int, user_in: UserUpdate):

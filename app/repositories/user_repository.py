@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User
@@ -16,9 +16,14 @@ class UserRepository:
 		return result.scalars().first()
 
 	@staticmethod
-	async def get_list(db: AsyncSession, skip: int = 0, limit: int = 100) -> list[User]:
-		result = await db.execute(select(User).offset(skip).limit(limit))
+	async def get_list(db: AsyncSession, offset: int = 0, limit: int = 100) -> list[User]:
+		result = await db.execute(select(User).offset(offset).limit(limit))
 		return list(result.scalars().all())
+
+	@staticmethod
+	async def get_count(db: AsyncSession) -> int:
+		result = await db.execute(select(func.count()).select_from(User))
+		return result.scalar_one()
 
 	@staticmethod
 	async def create(db: AsyncSession, user_in: UserCreate) -> User:

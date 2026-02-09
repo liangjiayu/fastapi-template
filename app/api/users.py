@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app.core.database import DB
-from app.schemas.response import ApiResponse
+from app.schemas.response import ApiResponse, PageData
 from app.schemas.user import UserCreate, UserOut, UserUpdate
 from app.services import user_service
 
@@ -14,10 +14,10 @@ async def create_user(user_in: UserCreate, db: DB):
 	return ApiResponse.ok(data=user)
 
 
-@router.get("/", response_model=ApiResponse[list[UserOut]])
-async def get_users(skip: int = 0, limit: int = 100, db: DB = None):
-	users = await user_service.get_users(db, skip, limit)
-	return ApiResponse.ok(data=users)
+@router.get("/", response_model=ApiResponse[PageData[UserOut]])
+async def get_users(page: int = 1, page_size: int = 20, db: DB = None):
+	result = await user_service.get_users(db, page, page_size)
+	return ApiResponse.page(**result)
 
 
 @router.get("/{user_id}", response_model=ApiResponse[UserOut])
