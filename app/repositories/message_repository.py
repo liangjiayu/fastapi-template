@@ -4,13 +4,11 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.message import Message
-from app.schemas.message import MessageCreate, MessageUpdate
+from app.repositories.base import BaseRepository
 
 
-class MessageRepository:
-	@staticmethod
-	async def get_by_id(db: AsyncSession, message_id: uuid.UUID) -> Message | None:
-		return await db.get(Message, message_id)
+class MessageRepository(BaseRepository):
+	model = Message
 
 	@staticmethod
 	async def get_list_by_conversation_id(
@@ -31,24 +29,3 @@ class MessageRepository:
 			select(func.count()).select_from(Message).where(Message.conversation_id == conversation_id)
 		)
 		return result.scalar_one()
-
-	@staticmethod
-	async def create(db: AsyncSession, message_in: MessageCreate) -> Message:
-		message = Message(**message_in.model_dump())
-		db.add(message)
-		await db.commit()
-		await db.refresh(message)
-		return message
-
-	@staticmethod
-	async def update(db: AsyncSession, message: Message, message_in: MessageUpdate) -> Message:
-		for key, value in message_in.model_dump(exclude_unset=True).items():
-			setattr(message, key, value)
-		await db.commit()
-		await db.refresh(message)
-		return message
-
-	@staticmethod
-	async def delete(db: AsyncSession, message: Message) -> None:
-		await db.delete(message)
-		await db.commit()

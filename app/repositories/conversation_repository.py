@@ -4,13 +4,11 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.conversation import Conversation
-from app.schemas.conversation import ConversationCreate, ConversationUpdate
+from app.repositories.base import BaseRepository
 
 
-class ConversationRepository:
-	@staticmethod
-	async def get_by_id(db: AsyncSession, conversation_id: uuid.UUID) -> Conversation | None:
-		return await db.get(Conversation, conversation_id)
+class ConversationRepository(BaseRepository):
+	model = Conversation
 
 	@staticmethod
 	async def get_list(
@@ -31,26 +29,3 @@ class ConversationRepository:
 			stmt = stmt.where(Conversation.user_id == user_id)
 		result = await db.execute(stmt)
 		return result.scalar_one()
-
-	@staticmethod
-	async def create(db: AsyncSession, conversation_in: ConversationCreate) -> Conversation:
-		conversation = Conversation(**conversation_in.model_dump())
-		db.add(conversation)
-		await db.commit()
-		await db.refresh(conversation)
-		return conversation
-
-	@staticmethod
-	async def update(
-		db: AsyncSession, conversation: Conversation, conversation_in: ConversationUpdate
-	) -> Conversation:
-		for key, value in conversation_in.model_dump(exclude_unset=True).items():
-			setattr(conversation, key, value)
-		await db.commit()
-		await db.refresh(conversation)
-		return conversation
-
-	@staticmethod
-	async def delete(db: AsyncSession, conversation: Conversation) -> None:
-		await db.delete(conversation)
-		await db.commit()
