@@ -14,6 +14,7 @@ from app.core.exceptions import register_exception_handlers
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 	logger.info("Starting up...")
+	# SQLite 自动建表；PostgreSQL 应通过迁移工具管理表结构
 	if settings.DB_ENGINE == "sqlite":
 		await init_db()
 	yield
@@ -21,6 +22,7 @@ async def lifespan(app: FastAPI):
 	await engine.dispose()
 
 
+# 用路由函数名作为 OpenAPI operationId，方便客户端代码生成
 def custom_generate_unique_id(route: APIRoute) -> str:
 	return route.name
 
@@ -35,6 +37,7 @@ def init_app() -> FastAPI:
 	register_exception_handlers(app)
 	app.include_router(router)
 
+	# 自定义 OpenAPI schema：移除 FastAPI 默认的 422 响应和校验相关 schema，
 	def custom_openapi():
 		if app.openapi_schema:
 			return app.openapi_schema

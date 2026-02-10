@@ -4,12 +4,14 @@ from fastapi.responses import JSONResponse
 from loguru import logger
 
 
+# 业务异常：在 service 层抛出，会被全局处理器捕获并返回统一格式
 class BizException(Exception):
 	def __init__(self, code: int = 400, msg: str = "error"):
 		self.code = code
 		self.msg = msg
 
 
+# 统一错误码处理
 def register_exception_handlers(app: FastAPI):
 	@app.exception_handler(BizException)
 	async def biz_exception_handler(request: Request, exc: BizException):
