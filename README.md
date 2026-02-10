@@ -101,7 +101,7 @@ fastapi dev app/main.py
 
 所有接口前缀为 `/api`，返回统一的响应结构。列表接口均支持 `page` / `page_size` 分页，并返回分页元数据。
 
-### Users
+以 Users 为例，其余资源（Conversations、Messages）遵循相同的 RESTful 风格：
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
@@ -111,25 +111,7 @@ fastapi dev app/main.py
 | PUT | `/api/users/{user_id}` | 更新用户 |
 | DELETE | `/api/users/{user_id}` | 删除用户 |
 
-### Conversations
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| POST | `/api/conversations/` | 创建会话 |
-| GET | `/api/conversations/` | 获取会话列表 (支持 user_id 筛选, 分页) |
-| GET | `/api/conversations/{conversation_id}` | 获取单个会话 |
-| PUT | `/api/conversations/{conversation_id}` | 更新会话 |
-| DELETE | `/api/conversations/{conversation_id}` | 删除会话 |
-
-### Messages
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| POST | `/api/messages/` | 创建消息 |
-| GET | `/api/messages/conversation/{conversation_id}` | 获取会话下的消息列表 (分页) |
-| GET | `/api/messages/{message_id}` | 获取单个消息 |
-| PUT | `/api/messages/{message_id}` | 更新消息 |
-| DELETE | `/api/messages/{message_id}` | 删除消息 |
+完整接口文档启动后访问 `/docs` 查看。
 
 ## 统一响应格式
 
@@ -192,15 +174,7 @@ fastapi dev app/main.py
 
 ## 数据模型
 
-### User
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | int | 主键，自增 |
-| username | str | 用户名，唯一 |
-| email | str | 邮箱，唯一 |
-
-### Conversation
+以 Conversation 为例，完整建表语句见 `sql/schema.sql`：
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -212,17 +186,20 @@ fastapi dev app/main.py
 | created_at | datetime | 创建时间 |
 | updated_at | datetime | 更新时间 |
 
-### Message
+## Docker 部署
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | UUID | 主键 |
-| conversation_id | UUID | 所属会话 (级联删除) |
-| role | str | 角色 (system / user / assistant) |
-| content | text | 消息内容 |
-| status | str | 状态 (processing / success / error) |
-| extra_data | JSON | 扩展数据 (思考过程、token 用量等) |
-| created_at | datetime | 创建时间 |
+```bash
+# 构建并启动（应用 + PostgreSQL）
+docker compose up --build -d
+
+# 查看日志
+docker compose logs -f app
+
+# 停止并清理
+docker compose down -v
+```
+
+首次启动时 PostgreSQL 会自动执行 `sql/schema.sql` 完成建表。
 
 ## 开发约定
 
