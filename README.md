@@ -209,69 +209,42 @@ docker compose logs -f app
 docker compose down -v
 ```
 
-## 数据库迁移管理
+## 数据库迁移
 
 项目使用 Alembic 管理数据库 schema 变更。
 
 ### 常用命令
 
 ```bash
-# 应用迁移
+# 初始化/更新数据库
 uv run alembic upgrade head
 
-# 回滚一个迁移
+# 生成迁移（修改模型后）
+uv run alembic revision --autogenerate -m "描述"
+
+# 回滚最近一次
 uv run alembic downgrade -1
-
-# 查看当前版本
-uv run alembic current
-
-# 查看迁移历史
-uv run alembic history
 ```
 
-### 标准工作流程
-
-**推荐做法：修改 ORM 模型后自动生成迁移**
+### 基本流程
 
 ```bash
 # 1. 修改模型文件（例如 app/models/user.py）
-vim app/models/user.py
+# 2. 生成迁移脚本
+uv run alembic revision --autogenerate -m "Add avatar field"
 
-# 2. 自动生成迁移脚本
-uv run alembic revision --autogenerate -m "Add avatar field to users"
-
-# 3. 检查生成的迁移文件（alembic/versions/）
-cat alembic/versions/2026_02_11_xxxx_add_avatar_field_to_users.py
+# 3. 检查生成的文件
+cat alembic/versions/xxxxx_add_avatar_field.py
 
 # 4. 应用迁移
 uv run alembic upgrade head
 ```
 
-**示例：给 User 表添加字段**
+**⚠️ 重要：** 添加新模型时必须在 `alembic/env.py` 中导入，否则 autogenerate 无法检测到。
 
-修改模型：
+**详细说明：** 查看 [alembic/README](alembic/README) 了解更多迁移场景和最佳实践。
 
-```python
-# app/models/user.py
-class User(Base):
-	__tablename__ = "users"
-	id = Column(Integer, primary_key=True)
-	username = Column(String, nullable=False, unique=True, index=True)
-	email = Column(String, nullable=False, unique=True, index=True)
-	avatar = Column(String, nullable=True)  # 新增字段
-```
-
-自动生成的迁移文件：
-
-```python
-def upgrade() -> None:
-	op.add_column('users', sa.Column('avatar', sa.String(), nullable=True))
-
-def downgrade() -> None:
-	op.drop_column('users', 'avatar')
-```
-
-Docker 容器启动时会自动运行 `alembic upgrade head`。
+**Docker 部署：** 容器启动时会自动运行 `alembic upgrade head`。
 
 ## 测试
 
