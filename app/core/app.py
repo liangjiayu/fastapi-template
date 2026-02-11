@@ -7,16 +7,15 @@ from loguru import logger
 
 from app.api import router
 from app.core.config import settings
-from app.core.database import engine, init_db
+from app.core.database import engine
 from app.core.exceptions import register_exception_handlers
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 	logger.info("Starting up...")
-	# SQLite 自动建表；PostgreSQL 应通过迁移工具管理表结构
-	if settings.DB_ENGINE == "sqlite":
-		await init_db()
+	# 数据库 schema 现在由 Alembic 迁移管理
+	# 运行 "alembic upgrade head" 来初始化或更新数据库
 	yield
 	logger.info("Shutting down...")
 	await engine.dispose()

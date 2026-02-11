@@ -9,6 +9,7 @@ FastAPI project template with async SQLAlchemy, supporting PostgreSQL and SQLite
 - **Framework:** FastAPI
 - **ORM:** SQLAlchemy 2.0 (async)
 - **Database:** PostgreSQL (asyncpg) / SQLite (aiosqlite)
+- **Migrations:** Alembic
 - **Validation:** Pydantic v2 + pydantic-settings
 - **Logging:** Loguru
 - **Package Manager:** uv
@@ -40,12 +41,18 @@ app/
 
 - **Run dev server:** `fastapi dev app/main.py`
 - **Install deps:** `uv sync`
+- **Initialize database:** `uv run alembic upgrade head`
+- **Create migration:** `uv run alembic revision --autogenerate -m "description"`
+- **Apply migrations:** `uv run alembic upgrade head`
+- **Rollback migration:** `uv run alembic downgrade -1`
 
 ## Configuration
 
 All config is in `app/core/config.py` via `pydantic-settings`, reading from `.env`:
 - `DB_ENGINE`: "sqlite" or "postgres"
 - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` for PostgreSQL
+
+Database schema is managed by Alembic migrations. Run `uv run alembic upgrade head` to initialize or update the database.
 
 ## Conventions
 

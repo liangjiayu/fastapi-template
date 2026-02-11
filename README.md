@@ -91,6 +91,14 @@ DB_USER=postgres
 DB_PASSWORD=
 ```
 
+### 初始化数据库
+
+首次运行需要执行数据库迁移：
+
+```bash
+uv run alembic upgrade head
+```
+
 ### 启动开发服务器
 
 ```bash
@@ -98,10 +106,6 @@ fastapi dev app/main.py
 ```
 
 启动后访问 `http://127.0.0.1:8000/docs` 查看交互式 API 文档。
-
-> **SQLite 模式：** 开发环境下会自动创建表结构，无需额外操作。
->
-> **PostgreSQL 模式：** 需使用 `sql/schema.sql` 手动创建表结构。
 
 ## API 接口
 
@@ -180,7 +184,7 @@ fastapi dev app/main.py
 
 ## 数据模型
 
-以 Conversation 为例，完整建表语句见 `sql/schema.sql`：
+以 Conversation 为例：
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -205,7 +209,24 @@ docker compose logs -f app
 docker compose down -v
 ```
 
-首次启动时 PostgreSQL 会自动执行 `sql/schema.sql` 完成建表。
+## 数据库迁移管理
+
+```bash
+# 修改模型后生成迁移脚本
+uv run alembic revision --autogenerate -m "描述变更内容"
+
+# 应用迁移
+uv run alembic upgrade head
+
+# 回滚一个迁移
+uv run alembic downgrade -1
+
+# 查看当前版本
+uv run alembic current
+
+# 查看迁移历史
+uv run alembic history
+```
 
 ## 测试
 
