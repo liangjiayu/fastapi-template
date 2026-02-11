@@ -1,0 +1,77 @@
+# Pre-commit 配置 - 轻量级版本，专注于核心检查
+# 安装: uv run pre-commit install
+# 手动运行: uv run pre-commit run --all-files
+# 跳过检查: git commit --no-verify
+
+repos:
+  # ============================================
+  # Ruff - Python 代码检查和格式化（快速！）
+  # ============================================
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.0
+    hooks:
+      # 1. 代码格式化（自动修复）
+      - id: ruff-format
+        name: "🎨 Ruff Format"
+        description: "格式化 Python 代码（缩进、引号、空格等）"
+
+      # 2. 代码检查（自动修复简单问题）
+      - id: ruff
+        name: "🔍 Ruff Lint"
+        description: "检查代码质量（未使用导入、语法错误等）"
+        args: [--fix, --exit-non-zero-on-fix]
+
+  # ============================================
+  # 通用检查（快速，几乎不耗时）
+  # ============================================
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # 文件末尾空行
+      - id: end-of-file-fixer
+        name: "📄 Fix EOF"
+        exclude: "^tests/"
+
+      # 去除行尾空格
+      - id: trailing-whitespace
+        name: "✂️  Trim Whitespace"
+        args: [--markdown-linebreak-ext=md]
+
+      # 检查合并冲突标记
+      - id: check-merge-conflict
+        name: "⚠️  Check Merge Conflict"
+
+      # 检查 YAML 语法
+      - id: check-yaml
+        name: "✅ Check YAML"
+        exclude: "^.vscode/"
+
+      # 检查 JSON 语法（排除 VSCode 配置，因为它们支持 JSONC 格式）
+      - id: check-json
+        name: "✅ Check JSON"
+        exclude: "^.vscode/"
+
+      # 防止提交大文件（超过 500KB）
+      - id: check-added-large-files
+        name: "📦 Check Large Files"
+        args: [--maxkb=500]
+
+# ============================================
+# 性能配置
+# ============================================
+# 并行执行（加快速度）
+default_install_hook_types: [pre-commit]
+fail_fast: false  # 显示所有错误，而不是第一个错误就停止
+
+# ============================================
+# 排除文件
+# ============================================
+exclude: |
+  (?x)^(
+    \.venv/|
+    \.git/|
+    __pycache__/|
+    alembic/versions/.*\.py|
+    \.pytest_cache/|
+    \.ruff_cache/
+  )$

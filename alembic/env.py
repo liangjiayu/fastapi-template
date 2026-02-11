@@ -1,17 +1,16 @@
 from logging.config import fileConfig
+
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
+
 from alembic import context
+from app.core.config import settings
 
 # 导入 Base 和 settings
 from app.core.database import Base
-from app.core.config import settings
 
 # 导入所有模型(autogenerate 需要)
-from app.models.user import User
-from app.models.conversation import Conversation
-from app.models.message import Message
 
 config = context.config
 
@@ -61,6 +60,7 @@ async def run_async_migrations() -> None:
 def run_migrations_online() -> None:
 	"""在线模式运行迁移"""
 	import asyncio
+
 	asyncio.run(run_async_migrations())
 
 

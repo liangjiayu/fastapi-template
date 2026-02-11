@@ -71,6 +71,16 @@ API (路由层)  →  Service (业务层)  →  Repository (数据层)  →  Dat
 uv sync
 ```
 
+### 安装 Git Hooks（可选但推荐）
+
+安装 pre-commit hooks，提交代码前自动检查格式：
+
+```bash
+uv run pre-commit install
+```
+
+首次提交会稍慢（下载 hooks），之后每次提交约 2-3 秒。
+
 ### 配置环境变量
 
 复制 `.env.example` 为 `.env` 并根据需要修改：
@@ -321,7 +331,41 @@ code --install-extension charliermarsh.ruff
 
 **详细说明：** 查看 [.vscode/README.md](.vscode/README.md) 了解 VSCode 中的 Ruff 使用指南。
 
-**建议：** 提交代码前运行 `ruff check` 确保代码质量。
+### Pre-commit Hooks（推荐）
+
+项目配置了 pre-commit，在每次 `git commit` 前自动运行检查：
+
+✅ **自动检查项：**
+- 🎨 代码格式化（Ruff Format）
+- 🔍 代码质量检查（Ruff Lint）
+- 📄 文件末尾空行
+- ✂️ 行尾空格清理
+- ⚠️ 合并冲突标记
+- 📦 大文件检测（>500KB）
+
+**安装（首次）：**
+```bash
+uv run pre-commit install
+```
+
+**手动运行所有检查：**
+```bash
+uv run pre-commit run --all-files
+```
+
+**跳过检查（紧急情况）：**
+```bash
+git commit -m "..." --no-verify
+```
+
+**工作流：**
+1. 正常编写代码
+2. `git add .` 暂存更改
+3. `git commit -m "..."` 提交（自动运行检查）
+   - ✅ 检查通过 → 提交成功
+   - ❌ 检查失败 → 自动修复 → 重新 `git add` → 再次提交
+
+**性能：** 首次提交约 5-10 秒（下载 hooks），后续每次约 2-3 秒。
 
 ## 日志系统
 
