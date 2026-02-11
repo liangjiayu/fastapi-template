@@ -38,17 +38,10 @@ exclude = [
 ]
 
 [tool.ruff.lint]
-# 核心规则（温和模式，适合团队协作）：
-# E: pycodestyle 错误（语法错误、明显问题）
-# F: pyflakes（未使用的导入、未定义的变量等）
-# I: isort（导入排序，保持一致性）
-select = ["E", "F", "I"]
-
-# 忽略的规则：
-ignore = [
-    "E501",  # 行长度由 formatter 处理，不需要 linter 警告
-    "E741",  # 允许使用单字母变量名（如 l, i 等）
-]
+# 极简规则：只检查真正的代码错误
+# F: pyflakes - 未使用的导入、未定义的变量、重复定义等
+# 格式问题（缩进、空格等）完全由 ruff format 自动处理
+select = ["F"]
 
 # 特定文件的例外规则
 [tool.ruff.lint.per-file-ignores]

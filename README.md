@@ -299,15 +299,16 @@ uv run ruff check app/ --fix
 uv run ruff format app/
 ```
 
-### Ruff 配置说明
+### Ruff 配置说明（极简模式）
 
 - **行长度：** 120 字符
 - **缩进风格：** Tab（4 个空格宽度）
-- **启用规则：**
-  - `E` - pycodestyle 错误（语法错误、明显问题）
-  - `F` - pyflakes（未使用的导入、未定义的变量）
-  - `I` - isort（导入排序）
-- **设计理念：** 只检查真正的错误，不强制过于严格的风格规范
+- **检查规则：** 只启用 `F`（pyflakes）
+  - 未定义的变量
+  - 未使用的导入
+  - 重复定义
+  - 其他逻辑错误
+- **设计理念：** 格式问题完全由 `ruff format` 自动处理，linter 只检查真正的代码错误
 
 ### VSCode 集成（推荐）
 
@@ -331,17 +332,13 @@ code --install-extension charliermarsh.ruff
 
 **详细说明：** 查看 [.vscode/README.md](.vscode/README.md) 了解 VSCode 中的 Ruff 使用指南。
 
-### Pre-commit Hooks（推荐）
+### Pre-commit Hooks（极简配置）
 
 项目配置了 pre-commit，在每次 `git commit` 前自动运行检查：
 
-✅ **自动检查项：**
-- 🎨 代码格式化（Ruff Format）
-- 🔍 代码质量检查（Ruff Lint）
-- 📄 文件末尾空行
-- ✂️ 行尾空格清理
-- ⚠️ 合并冲突标记
-- 📦 大文件检测（>500KB）
+✅ **仅 2 项检查：**
+- 🎨 代码格式化（Ruff Format）- 自动修复缩进、引号、空格、导入排序等
+- 🔍 代码错误检查（Ruff Lint）- 只检查未定义变量、未使用导入等真正的错误
 
 **安装（首次）：**
 ```bash
