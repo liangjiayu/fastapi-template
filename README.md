@@ -248,35 +248,20 @@ uv run alembic upgrade head
 
 ## 测试
 
-项目包含完整的 API 集成测试，覆盖所有接口的 CRUD 操作和业务规则校验。
-
-### 运行测试
+项目包含完整的 API 集成测试，使用 pytest + httpx 进行异步测试，每个测试使用独立的内存 SQLite 数据库确保隔离。
 
 ```bash
 # 运行所有测试
-uv run pytest tests/ -v
+uv run pytest
 
-# 运行指定模块测试
-uv run pytest tests/test_users.py -v
+# 运行指定文件的测试
+uv run pytest tests/test_users.py
 
-# 运行单个测试函数
-uv run pytest tests/test_users.py::test_create_user -v
+# 显示详细输出
+uv run pytest -v
 ```
 
-### 测试覆盖
-
-- **Users API** (7 个测试) - 创建、获取、列表、更新、删除 + 用户名唯一性校验 + 404 错误
-- **Conversations API** (7 个测试) - 创建、获取、列表、user_id 过滤、更新、删除 + 404 错误
-- **Messages API** (7 个测试) - 创建、获取、列表、更新、删除 + conversation 存在性校验 + 404 错误
-
-**共 21 个测试用例**，涵盖所有 API 端点的正常流程和关键业务规则。
-
-### 测试基础设施
-
-- 使用 **内存 SQLite 数据库** (`sqlite+aiosqlite:///`) 进行测试隔离
-- 通过 **httpx AsyncClient** 进行集成测试，直接调用 ASGI 应用
-- 每个测试前自动建表，测试后自动删表，确保完全隔离
-- 测试依赖：`pytest`、`pytest-asyncio`、`httpx`
+**详细说明：** 查看 [tests/README.md](tests/README.md) 了解更多测试命令和配置说明。
 
 ## 开发约定
 
