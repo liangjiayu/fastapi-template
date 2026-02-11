@@ -211,10 +211,11 @@ docker compose down -v
 
 ## 数据库迁移管理
 
-```bash
-# 修改模型后生成迁移脚本
-uv run alembic revision --autogenerate -m "描述变更内容"
+项目使用 Alembic 管理数据库 schema 变更。
 
+### 常用命令
+
+```bash
 # 应用迁移
 uv run alembic upgrade head
 
@@ -227,6 +228,50 @@ uv run alembic current
 # 查看迁移历史
 uv run alembic history
 ```
+
+### 标准工作流程
+
+**推荐做法：修改 ORM 模型后自动生成迁移**
+
+```bash
+# 1. 修改模型文件（例如 app/models/user.py）
+vim app/models/user.py
+
+# 2. 自动生成迁移脚本
+uv run alembic revision --autogenerate -m "Add avatar field to users"
+
+# 3. 检查生成的迁移文件（alembic/versions/）
+cat alembic/versions/2026_02_11_xxxx_add_avatar_field_to_users.py
+
+# 4. 应用迁移
+uv run alembic upgrade head
+```
+
+**示例：给 User 表添加字段**
+
+修改模型：
+
+```python
+# app/models/user.py
+class User(Base):
+	__tablename__ = "users"
+	id = Column(Integer, primary_key=True)
+	username = Column(String, nullable=False, unique=True, index=True)
+	email = Column(String, nullable=False, unique=True, index=True)
+	avatar = Column(String, nullable=True)  # 新增字段
+```
+
+自动生成的迁移文件：
+
+```python
+def upgrade() -> None:
+	op.add_column('users', sa.Column('avatar', sa.String(), nullable=True))
+
+def downgrade() -> None:
+	op.drop_column('users', 'avatar')
+```
+
+Docker 容器启动时会自动运行 `alembic upgrade head`。
 
 ## 测试
 
