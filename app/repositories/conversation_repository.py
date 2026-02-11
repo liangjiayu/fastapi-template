@@ -1,5 +1,3 @@
-import uuid
-
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,9 +15,7 @@ class ConversationRepository(BaseRepository):
 		stmt = select(Conversation)
 		if user_id is not None:
 			stmt = stmt.where(Conversation.user_id == user_id)
-		result = await db.execute(
-			stmt.order_by(Conversation.updated_at.desc()).offset(offset).limit(limit)
-		)
+		result = await db.execute(stmt.order_by(Conversation.updated_at.desc()).offset(offset).limit(limit))
 		return list(result.scalars().all())
 
 	@staticmethod

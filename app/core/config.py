@@ -1,7 +1,7 @@
 from functools import cached_property
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import computed_field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -25,11 +25,19 @@ class Settings(BaseSettings):
 	DB_USER: str = "postgres"
 	DB_PASSWORD: str = ""
 
+	# 日志配置
+	LOG_LEVEL: str = "INFO"
+	LOG_FILE_ENABLED: bool = True
+	LOG_FILE_ROTATION: str = "1 day"
+	LOG_FILE_RETENTION: str = "7 days"
+
 	@computed_field
 	@cached_property
 	def DATABASE_URL(self) -> str:
 		if self.DB_ENGINE == "postgres":
-			return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+			return (
+				f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+			)
 		return f"sqlite+aiosqlite:///./{self.DB_NAME}.db"
 
 	@computed_field

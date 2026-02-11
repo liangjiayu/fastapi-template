@@ -73,23 +73,32 @@ uv sync
 
 ### 配置环境变量
 
-复制 `.env` 文件并根据需要修改：
+复制 `.env.example` 为 `.env` 并根据需要修改：
+
+```bash
+cp .env.example .env
+```
+
+主要配置项：
 
 ```env
 # 应用配置
 APP_ENV=development
 APP_TITLE=FastAPI Project
-APP_DESCRIPTION=A modern FastAPI project structure
 DEBUG=True
 
 # 数据库配置 — 切换 DB_ENGINE 即可切换数据库
 DB_ENGINE=sqlite          # sqlite | postgres
 DB_NAME=fastapi_db
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=
+
+# 日志配置
+LOG_LEVEL=INFO
+LOG_FILE_ENABLED=True
+LOG_FILE_ROTATION=1 day
+LOG_FILE_RETENTION=7 days
 ```
+
+**⚠️ 重要：** `.env` 文件包含敏感信息，已被 `.gitignore` 排除，切勿提交到 Git 仓库。
 
 ### 初始化数据库
 
@@ -263,6 +272,87 @@ uv run pytest -v
 
 **详细说明：** 查看 [tests/README.md](tests/README.md) 了解更多测试命令和配置说明。
 
+## 代码质量
+
+### 代码格式化和检查
+
+项目使用 **Ruff** 进行代码格式化和 linting（采用温和规则，易于团队协作）：
+
+```bash
+# 检查代码质量
+uv run ruff check app/
+
+# 自动修复问题
+uv run ruff check app/ --fix
+
+# 格式化代码
+uv run ruff format app/
+```
+
+### Ruff 配置说明
+
+- **行长度：** 120 字符
+- **缩进风格：** Tab（4 个空格宽度）
+- **启用规则：**
+  - `E` - pycodestyle 错误（语法错误、明显问题）
+  - `F` - pyflakes（未使用的导入、未定义的变量）
+  - `I` - isort（导入排序）
+- **设计理念：** 只检查真正的错误，不强制过于严格的风格规范
+
+### VSCode 集成（推荐）
+
+项目已配置 VSCode 设置（`.vscode/settings.json`），安装 Ruff 扩展后：
+
+✅ **自动功能（保存时）：**
+- 代码格式化
+- 导入排序和清理
+- 删除未使用的导入
+
+⚠️ **提示警告（需手动修复）：**
+- 未定义的变量
+- 语法错误
+- 重复导入
+
+**安装扩展：**
+```bash
+# VSCode 会自动提示安装推荐扩展，或手动安装：
+code --install-extension charliermarsh.ruff
+```
+
+**详细说明：** 查看 [.vscode/README.md](.vscode/README.md) 了解 VSCode 中的 Ruff 使用指南。
+
+**建议：** 提交代码前运行 `ruff check` 确保代码质量。
+
+## 日志系统
+
+项目使用 **Loguru** 进行日志管理，配置文件在 `app/core/logging.py`。
+
+### 日志输出
+
+- **控制台输出：** 彩色格式化，便于开发调试
+- **文件输出：** 保存在 `logs/app.log`，按天轮转，压缩存储
+
+### 日志配置
+
+通过环境变量控制日志行为：
+
+```env
+LOG_LEVEL=INFO              # 日志级别：DEBUG, INFO, WARNING, ERROR
+LOG_FILE_ENABLED=True       # 是否启用文件日志
+LOG_FILE_ROTATION=1 day     # 日志轮转周期
+LOG_FILE_RETENTION=7 days   # 日志保留时间
+```
+
+### 使用示例
+
+```python
+from loguru import logger
+
+logger.info("User created successfully", user_id=123)
+logger.error("Failed to connect to database", error=str(e))
+logger.debug("Processing request", data=request_data)
+```
+
 ## 开发约定
 
 - 使用 **Tab** 缩进
@@ -270,3 +360,4 @@ uv run pytest -v
 - Repository 方法为 `@staticmethod`，第一个参数为 `db: AsyncSession`
 - Service 层通过 `BizException` 抛出业务异常，不依赖 FastAPI
 - 路由层使用 `ApiResponse[T]` 作为 `response_model`，返回值用 `ApiResponse.ok()` 包裹
+- 提交代码前运行 `ruff check --fix` 和 `ruff format` 确保代码质量

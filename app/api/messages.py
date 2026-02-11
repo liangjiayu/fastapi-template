@@ -17,9 +17,7 @@ async def create_message(message_in: MessageCreate, db: DB):
 
 
 @router.get("/conversation/{conversation_id}", response_model=ApiResponse[PageData[MessageOut]])
-async def get_messages(
-	conversation_id: uuid.UUID, page: int = 1, page_size: int = 20, db: DB = None
-):
+async def get_messages(conversation_id: uuid.UUID, page: int = 1, page_size: int = 20, db: DB = None):
 	result = await message_service.get_messages(db, conversation_id, page, page_size)
 	return ApiResponse.page(**result)
 

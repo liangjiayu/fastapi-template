@@ -1,17 +1,17 @@
 import uuid
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class MessageRole(str, Enum):
+class MessageRole(StrEnum):
 	system = "system"
 	user = "user"
 	assistant = "assistant"
 
 
-class MessageStatus(str, Enum):
+class MessageStatus(StrEnum):
 	processing = "processing"
 	success = "success"
 	error = "error"

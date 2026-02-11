@@ -25,9 +25,7 @@ async def get_conversations(db: AsyncSession, user_id: str | None = None, page: 
 	return {"list": conversations, "total": total, "page": page, "page_size": page_size}
 
 
-async def update_conversation(
-	db: AsyncSession, conversation_id: uuid.UUID, conversation_in: ConversationUpdate
-):
+async def update_conversation(db: AsyncSession, conversation_id: uuid.UUID, conversation_in: ConversationUpdate):
 	conversation = await get_conversation(db, conversation_id)
 	return await ConversationRepository.update(db, conversation, conversation_in)
 

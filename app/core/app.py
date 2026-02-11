@@ -9,6 +9,7 @@ from app.api import router
 from app.core.config import settings
 from app.core.database import engine
 from app.core.exceptions import register_exception_handlers
+from app.core.logging import setup_logging
 
 
 @asynccontextmanager
@@ -27,6 +28,9 @@ def custom_generate_unique_id(route: APIRoute) -> str:
 
 
 def init_app() -> FastAPI:
+	# 初始化日志系统（必须在最开始）
+	setup_logging()
+
 	app = FastAPI(
 		title=settings.APP_TITLE,
 		description=settings.APP_DESCRIPTION,

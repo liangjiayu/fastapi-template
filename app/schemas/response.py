@@ -1,4 +1,5 @@
-from typing import Any, Generic, List, TypeVar
+import builtins
+from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -6,7 +7,7 @@ T = TypeVar("T")
 
 
 class PageData(BaseModel, Generic[T]):
-	list: List[T] = Field(description="数据列表")
+	list: builtins.list[T] = Field(description="数据列表")
 	total: int = Field(description="总记录数")
 	page: int = Field(description="当前页码")
 	page_size: int = Field(description="每页条数")

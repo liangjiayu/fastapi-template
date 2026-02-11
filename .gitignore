@@ -1,8 +1,53 @@
-.venv
+# Python
+.venv/
 **/__pycache__/
-.DS_Store
+*.py[cod]
+*$py.class
+*.so
+.Python
 
-# Database files
+# 环境变量（重要：防止泄露敏感信息）
+.env
+.env.local
+.env.*.local
+
+# 数据库文件
 *.db
 *.sqlite
 *.sqlite3
+
+# 日志文件
+*.log
+logs/
+*.log.*
+
+# 测试和覆盖率
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE 配置文件
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Ruff 缓存
+.ruff_cache/
+
+# MyPy 缓存
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# 分布式任务
+celerybeat-schedule
+celerybeat.pid
+
+# 环境配置
+.envrc

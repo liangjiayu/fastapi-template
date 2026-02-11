@@ -19,7 +19,41 @@ dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.25.0",
     "httpx>=0.28.0",
+    "ruff>=0.8.0",
 ]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+
+# Ruff 配置：代码格式化和 linting
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+exclude = [
+    ".venv",
+    ".git",
+    "__pycache__",
+    "alembic/versions",
+]
+
+[tool.ruff.lint]
+# 核心规则（温和模式，适合团队协作）：
+# E: pycodestyle 错误（语法错误、明显问题）
+# F: pyflakes（未使用的导入、未定义的变量等）
+# I: isort（导入排序，保持一致性）
+select = ["E", "F", "I"]
+
+# 忽略的规则：
+ignore = [
+    "E501",  # 行长度由 formatter 处理，不需要 linter 警告
+    "E741",  # 允许使用单字母变量名（如 l, i 等）
+]
+
+# 特定文件的例外规则
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # 允许 __init__.py 中的未使用导入（常用于导出）
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "tab"
+line-ending = "auto"

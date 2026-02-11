@@ -10,8 +10,8 @@ class BaseRepository[T: Base]:
 	model: type[T]
 
 	@classmethod
-	async def get_by_id(cls, db: AsyncSession, id: Any) -> T | None:
-		return await db.get(cls.model, id)
+	async def get_by_id(cls, db: AsyncSession, obj_id: Any) -> T | None:
+		return await db.get(cls.model, obj_id)
 
 	@classmethod
 	async def create(cls, db: AsyncSession, create_in: BaseModel) -> T:

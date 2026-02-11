@@ -29,9 +29,7 @@ async def get_conversation(conversation_id: uuid.UUID, db: DB):
 
 
 @router.put("/{conversation_id}", response_model=ApiResponse[ConversationOut])
-async def update_conversation(
-	conversation_id: uuid.UUID, conversation_in: ConversationUpdate, db: DB
-):
+async def update_conversation(conversation_id: uuid.UUID, conversation_in: ConversationUpdate, db: DB):
 	conversation = await conversation_service.update_conversation(db, conversation_id, conversation_in)
 	return ApiResponse.ok(data=conversation)
 
