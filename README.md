@@ -239,12 +239,6 @@ uv run pytest tests/test_users.py::test_create_user -v
 - 每个测试前自动建表，测试后自动删表，确保完全隔离
 - 测试依赖：`pytest`、`pytest-asyncio`、`httpx`
 
-### VSCode 集成
-
-1. 安装 Python 扩展后，按 `Cmd+Shift+P` → 选择 "Python: Configure Tests" → 选择 `pytest`
-2. 点击左侧测试图标即可查看和运行所有测试
-3. 在测试函数上方会显示 "Run Test" 按钮，支持单独运行或调试
-
 ## 开发约定
 
 - 使用 **Tab** 缩进
