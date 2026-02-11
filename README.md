@@ -10,6 +10,7 @@
 - **数据校验：** Pydantic v2
 - **配置管理：** pydantic-settings
 - **日志：** Loguru
+- **测试：** pytest + pytest-asyncio + httpx
 - **包管理：** uv
 - **Python：** >= 3.14
 
@@ -44,6 +45,11 @@ app/
     ├── user.py
     ├── conversation.py
     └── message.py
+tests/
+├── conftest.py              # 测试配置和 fixtures
+├── test_users.py            # 用户接口测试
+├── test_conversations.py    # 会话接口测试
+└── test_messages.py         # 消息接口测试
 ```
 
 ## 架构
@@ -200,6 +206,44 @@ docker compose down -v
 ```
 
 首次启动时 PostgreSQL 会自动执行 `sql/schema.sql` 完成建表。
+
+## 测试
+
+项目包含完整的 API 集成测试，覆盖所有接口的 CRUD 操作和业务规则校验。
+
+### 运行测试
+
+```bash
+# 运行所有测试
+uv run pytest tests/ -v
+
+# 运行指定模块测试
+uv run pytest tests/test_users.py -v
+
+# 运行单个测试函数
+uv run pytest tests/test_users.py::test_create_user -v
+```
+
+### 测试覆盖
+
+- **Users API** (7 个测试) - 创建、获取、列表、更新、删除 + 用户名唯一性校验 + 404 错误
+- **Conversations API** (7 个测试) - 创建、获取、列表、user_id 过滤、更新、删除 + 404 错误
+- **Messages API** (7 个测试) - 创建、获取、列表、更新、删除 + conversation 存在性校验 + 404 错误
+
+**共 21 个测试用例**，涵盖所有 API 端点的正常流程和关键业务规则。
+
+### 测试基础设施
+
+- 使用 **内存 SQLite 数据库** (`sqlite+aiosqlite:///`) 进行测试隔离
+- 通过 **httpx AsyncClient** 进行集成测试，直接调用 ASGI 应用
+- 每个测试前自动建表，测试后自动删表，确保完全隔离
+- 测试依赖：`pytest`、`pytest-asyncio`、`httpx`
+
+### VSCode 集成
+
+1. 安装 Python 扩展后，按 `Cmd+Shift+P` → 选择 "Python: Configure Tests" → 选择 `pytest`
+2. 点击左侧测试图标即可查看和运行所有测试
+3. 在测试函数上方会显示 "Run Test" 按钮，支持单独运行或调试
 
 ## 开发约定
 
