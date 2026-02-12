@@ -60,3 +60,9 @@ Database schema is managed by Alembic migrations. Run `uv run alembic upgrade he
 - Imports use absolute paths from project root (e.g., `from app.core.config import settings`)
 - Repository methods are `@classmethod` and receive `cls` + `db: AsyncSession` as arguments
 - Service functions raise `HTTPException` for business rule violations
+
+## Git Commit
+
+- Commit 信息使用中文
+- 格式：`<type>: <简要描述>`，type 用英文（feat/fix/refactor/docs/chore）
+- 描述简洁，可以一句话概括，也可以用列表说明多项改动，小调整不需要详情

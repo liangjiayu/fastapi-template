@@ -10,4 +10,6 @@
 	"ruff.enable": true,
 	"ruff.lint.enable": true,
 	"editor.tabSize": 4,
+	"editor.insertSpaces": false,
+	"editor.rulers": [120],
 }
