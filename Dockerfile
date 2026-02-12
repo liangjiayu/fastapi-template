@@ -26,6 +26,9 @@ RUN groupadd --system appuser && \
 # 从构建阶段复制应用（含 .venv 和源码）
 COPY --from=builder /app /app
 
+# 创建日志目录并授权给 appuser
+RUN mkdir -p /app/logs && chown appuser:appuser /app/logs
+
 ENV PATH="/app/.venv/bin:$PATH"
 
 WORKDIR /app

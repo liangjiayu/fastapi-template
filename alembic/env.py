@@ -11,6 +11,7 @@ from app.core.config import settings
 from app.core.database import Base
 
 # 导入所有模型(autogenerate 需要)
+from app.models import *  # noqa: F401, F403
 
 config = context.config
 
