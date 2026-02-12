@@ -60,7 +60,7 @@ API (路由层)  →  Service (业务层)  →  Repository (数据层)  →  Dat
 
 - **路由层**只负责接收请求、返回响应，不包含业务逻辑
 - **业务层**处理校验和业务规则，抛出 `BizException`
-- **数据层**封装所有数据库操作，方法均为 `@staticmethod`
+- **数据层**封装所有数据库操作，方法均为 `@classmethod`
 - 所有数据库操作均为异步
 
 ## 快速开始
@@ -280,7 +280,6 @@ uv run pytest tests/test_users.py
 uv run pytest -v
 ```
 
-**详细说明：** 查看 [tests/README.md](tests/README.md) 了解更多测试命令和配置说明。
 
 ## 代码质量
 
@@ -397,7 +396,7 @@ logger.debug("Processing request", data=request_data)
 
 - 使用 **Tab** 缩进
 - 使用绝对路径导入 (如 `from app.core.config import settings`)
-- Repository 方法为 `@staticmethod`，第一个参数为 `db: AsyncSession`
+- Repository 方法为 `@classmethod`，参数为 `cls` + `db: AsyncSession`
 - Service 层通过 `BizException` 抛出业务异常，不依赖 FastAPI
 - 路由层使用 `ApiResponse[T]` 作为 `response_model`，返回值用 `ApiResponse.ok()` 包裹
 - 提交代码前运行 `ruff check --fix` 和 `ruff format` 确保代码质量

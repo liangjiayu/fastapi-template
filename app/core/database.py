@@ -25,8 +25,3 @@ async def get_db() -> AsyncGenerator[AsyncSession]:
 
 # 依赖注入类型别名，路由中直接用 db: DB 即可获取数据库会话
 DB = Annotated[AsyncSession, Depends(get_db)]
-
-
-async def init_db() -> None:
-	async with engine.begin() as conn:
-		await conn.run_sync(Base.metadata.create_all)

@@ -58,5 +58,5 @@ Database schema is managed by Alembic migrations. Run `uv run alembic upgrade he
 
 - Use tabs for indentation
 - Imports use absolute paths from project root (e.g., `from app.core.config import settings`)
-- Repository methods are `@staticmethod` and receive `db: AsyncSession` as first argument
+- Repository methods are `@classmethod` and receive `cls` + `db: AsyncSession` as arguments
 - Service functions raise `HTTPException` for business rule violations
