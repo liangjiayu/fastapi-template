@@ -23,7 +23,8 @@ app/
 │   ├── app.py               # 应用工厂 + 生命周期管理
 │   ├── config.py            # 配置中心 (pydantic-settings)
 │   ├── database.py          # 异步引擎、会话工厂、Base、get_db()
-│   └── exceptions.py        # BizException + 全局异常处理器
+│   ├── exceptions.py        # BizException + 全局异常处理器
+│   └── logging.py           # Loguru 日志配置（控制台 + 文件）
 ├── api/                     # 路由层 (薄层，只做请求/响应)
 │   ├── users.py             # 用户接口
 │   ├── conversations.py     # 会话接口
@@ -33,6 +34,7 @@ app/
 │   ├── conversation_service.py
 │   └── message_service.py
 ├── repositories/            # 数据访问层 (静态方法，接收 db session)
+│   ├── base.py              # 通用 CRUD 基类 BaseRepository[T]
 │   ├── user_repository.py
 │   ├── conversation_repository.py
 │   └── message_repository.py
@@ -130,7 +132,7 @@ fastapi dev app/main.py
 
 所有接口前缀为 `/api`，返回统一的响应结构。列表接口均支持 `page` / `page_size` 分页，并返回分页元数据。
 
-以 Users 为例，其余资源（Conversations、Messages）遵循相同的 RESTful 风格：
+### Users
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
@@ -140,70 +142,54 @@ fastapi dev app/main.py
 | PUT | `/api/users/{user_id}` | 更新用户 |
 | DELETE | `/api/users/{user_id}` | 删除用户 |
 
+### Conversations
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/conversations/` | 创建会话 |
+| GET | `/api/conversations/` | 获取会话列表 (分页，可按 `user_id` 过滤) |
+| GET | `/api/conversations/{conversation_id}` | 获取单个会话 |
+| PUT | `/api/conversations/{conversation_id}` | 更新会话 |
+| DELETE | `/api/conversations/{conversation_id}` | 删除会话（级联删除消息） |
+
+### Messages
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/messages/` | 创建消息 |
+| GET | `/api/messages/conversation/{conversation_id}` | 获取会话的消息列表 (分页) |
+| GET | `/api/messages/{message_id}` | 获取单条消息 |
+| PUT | `/api/messages/{message_id}` | 更新消息 |
+| DELETE | `/api/messages/{message_id}` | 删除消息 |
+
 完整接口文档启动后访问 `/docs` 查看。
 
 ## 统一响应格式
 
 所有接口返回统一的 `ApiResponse[T]` 结构：
 
-### 成功响应
-
 ```json
-{
-  "code": 200,
-  "msg": "success",
-  "data": { "id": 1, "username": "alice", "email": "alice@example.com" }
-}
-```
+// 成功响应
+{ "code": 200, "msg": "success", "data": { "id": 1, "username": "alice" } }
 
-### 分页响应
+// 分页响应
+{ "code": 200, "msg": "success", "data": { "list": [...], "total": 50, "page": 1, "page_size": 20 } }
 
-```json
-{
-  "code": 200,
-  "msg": "success",
-  "data": {
-    "list": [{ "id": 1, "username": "alice", "email": "alice@example.com" }],
-    "total": 50,
-    "page": 1,
-    "page_size": 20
-  }
-}
-```
-
-### 业务异常
-
-```json
-{
-  "code": 404,
-  "msg": "User not found",
-  "data": null
-}
-```
-
-### 参数校验错误
-
-```json
-{
-  "code": 422,
-  "msg": "Validation error",
-  "data": [{ "loc": ["body", "username"], "msg": "Field required", "type": "missing" }]
-}
-```
-
-### 服务器错误
-
-```json
-{
-  "code": 500,
-  "msg": "Internal server error",
-  "data": null
-}
+// 异常响应 (业务异常 / 校验错误 / 服务器错误)
+{ "code": 404, "msg": "User not found", "data": null }
 ```
 
 ## 数据模型
 
-以 Conversation 为例：
+### User
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | int | 主键，自增 |
+| username | str | 用户名，唯一 |
+| email | str | 邮箱，唯一 |
+
+### Conversation
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -214,6 +200,18 @@ fastapi dev app/main.py
 | extra_data | JSON | 扩展数据 (模型配置等) |
 | created_at | datetime | 创建时间 |
 | updated_at | datetime | 更新时间 |
+
+### Message
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | UUID | 主键 |
+| conversation_id | UUID | 所属会话 ID (外键，级联删除) |
+| role | str | 消息角色：system / user / assistant |
+| content | str | 消息内容 |
+| status | str | 消息状态：processing / success / error |
+| extra_data | JSON | 扩展数据 (思考过程、token 用量等) |
+| created_at | datetime | 创建时间 |
 
 ## Docker 部署
 
